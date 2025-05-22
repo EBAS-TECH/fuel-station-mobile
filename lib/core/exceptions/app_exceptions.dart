@@ -4,11 +4,15 @@ class AppException implements Exception {
   final String? url;
 
   AppException({required this.message, required this.prefix, this.url});
+   @override
+  String toString() => message; 
 }
 
 class BadRequestException extends AppException {
   BadRequestException({String? message, super.url})
     : super(message: message ?? 'Bad request', prefix: 'Bad Request');
+  @override
+  String toString() => message;
 }
 
 class FetchDataException extends AppException {

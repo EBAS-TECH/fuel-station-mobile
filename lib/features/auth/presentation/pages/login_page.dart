@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_event.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_state.dart';
-import 'package:station_manager/features/dashboard/presentation/pages/home_page.dart';
+import 'package:station_manager/features/dashboard/pages/home_page.dart';
 import 'package:station_manager/l10n/app_localizations.dart';
 import 'package:station_manager/shared/lanuage_switcher.dart';
 import 'package:station_manager/shared/show_snackbar.dart';
@@ -53,9 +53,12 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSucess) {
+          if (state is AuthLogInSucess) {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(
+                builder: (context) =>
+                    HomePage(userId: state.responseData!["id"]),
+              ),
             );
           } else if (state is AuthFailure) {
             ShowSnackbar.show(context, state.error, isError: true);
@@ -162,9 +165,6 @@ class _LoginPageState extends State<LoginPage> {
                         },
                       ),
                     ),
-                    SizedBox(height: textFieldSpacing),
-
-                    SizedBox(height: sectionSpacing / 2),
                   ],
                 ),
               ),

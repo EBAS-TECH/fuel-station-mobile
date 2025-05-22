@@ -9,7 +9,9 @@ import 'package:station_manager/core/themes/app_theme.dart';
 import 'package:station_manager/core/utils/token_services.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:station_manager/features/auth/presentation/pages/login_page.dart';
-import 'package:station_manager/features/dashboard/presentation/pages/home_page.dart';
+import 'package:station_manager/features/dashboard/pages/home_page.dart';
+import 'package:station_manager/features/station/presentation/bloc/station_bloc.dart';
+import 'package:station_manager/features/user/presentation/bloc/user_bloc.dart';
 import 'package:station_manager/l10n/app_localizations.dart';
 import 'package:station_manager/settings/locale_bloc.dart';
 
@@ -19,6 +21,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final tokenService = TokenService(prefs);
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  setUpDependencies();
   runApp(MainApp(tokenService: tokenService));
 }
 
@@ -31,7 +34,12 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [BlocProvider(create: (_) => sl<AuthBloc>())],
+      providers: [
+        BlocProvider(create: (_) => sl<AuthBloc>()),
+        BlocProvider(create: (_) => sl<UserBloc>()),
+        BlocProvider(create: (_) => sl<StationBloc>()),
+        BlocProvider(create: (_) => LocaleBloc()),
+      ],
       child: Builder(
         builder: (context) {
           return MaterialApp(
@@ -55,7 +63,7 @@ class MainApp extends StatelessWidget {
 
                 if (hasToken) {
                   if (userId != null) {
-                    return HomePage();
+                    return HomePage(userId: userId);
                   } else {
                     return const LoginPage();
                   }
@@ -72,4 +80,3 @@ class MainApp extends StatelessWidget {
     );
   }
 }
-

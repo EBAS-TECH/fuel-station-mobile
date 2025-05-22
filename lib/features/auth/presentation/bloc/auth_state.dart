@@ -5,10 +5,15 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class AuthSucess extends AuthState {
+  final String message;
+
+  AuthSucess({required this.message});
+}
+class AuthLogInSucess extends AuthState {
   final Map<String, dynamic>? responseData;
   final String message;
 
-  AuthSucess({this.responseData, required this.message});
+  AuthLogInSucess({this.responseData, required this.message});
 }
 
 class AuthFailure extends AuthState {

@@ -31,12 +31,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     try {
       final response = await loginUsecase(event.userName, event.password);
+
       final userId = response["user"]["id"];
       final token = response["token"] ?? "";
       final userData = response["user"];
+      print(userData);
+      final role = response["user"]["role"] as String;
 
       await tokenService.saveToken(token);
       await tokenService.saveUserId(userId);
+      if (role.toLowerCase() != 'gas_station') {
+        emit(AuthFailure(error: "You are not a station manager"));
+        await tokenService.clearAll();
+        return;
+      }
+      emit(AuthLogInSucess(message: "Successfully logged", responseData: userData));
       final elapsed = stopwatch.elapsedMilliseconds;
       if (elapsed < _minimumLoadingTime) {
         await Future.delayed(
@@ -44,9 +53,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
       }
     } on BadRequestException catch (e) {
-      emit(AuthFailure(error: e.message));
+      emit(AuthFailure(error: e.toString()));
     } on UnAuthorizedException catch (e) {
-      emit(AuthFailure(error: e.message));
+      emit(AuthFailure(error: e.toString()));
     } catch (e) {
       final exception = ExceptionHandler.handleError(e);
       emit(AuthFailure(error: exception.toString()));

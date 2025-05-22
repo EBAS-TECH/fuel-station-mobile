@@ -6,18 +6,22 @@ import 'package:station_manager/core/exceptions/app_exceptions.dart';
 import 'package:station_manager/core/utils/exception_handler.dart';
 import 'package:station_manager/core/utils/token_services.dart';
 
-class AuthRemoteDataSources {
-  final String baseUrl = "${dotenv.get("BASE_URL")}/auth";
+class StationRemoteDataSources {
+  final String baseUrl = "${dotenv.get("BASE_URL")}/station/user";
   final TokenService tokenService;
 
-  AuthRemoteDataSources({required this.tokenService});
+  StationRemoteDataSources({required this.tokenService});
 
-  Future<Map<String, dynamic>> login(String userName, String password) async {
+  Future<Map<String, dynamic>> getStationById(String id) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/login'),
-        body: jsonEncode({"username": userName, "password": password}),
-        headers: {"Content-Type": "application/json"},
+      final token = await tokenService.getAuthToken();
+      print(token);
+      final response = await http.get(
+        Uri.parse('$baseUrl/$id'),
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $token',
+        },
       );
 
       final responseData = jsonDecode(response.body);
@@ -46,20 +50,4 @@ class AuthRemoteDataSources {
       throw ExceptionHandler.handleError(e);
     }
   }
-
-  Future<void> logOut() async {
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/logout"),
-        headers: {"Content-Type": "application/json"},
-      );
-
-      if (response.statusCode != 200) {
-        throw FetchDataException(message: 'Logout failed');
-      }
-    } catch (e) {
-      throw ExceptionHandler.handleError(e);
-    }
-  }
 }
-
