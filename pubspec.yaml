@@ -9,6 +9,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_bloc: ^9.1.1
+  flutter_dotenv: ^5.2.1
+  flutter_native_splash: ^2.4.6
+  flutter_secure_storage: ^9.2.4
+  get_it: ^8.0.3
+  http: ^1.4.0
+  permission_handler: ^12.0.0+1
+  pin_code_fields: ^8.0.1
+  shared_preferences: ^2.5.3
+  shimmer: ^3.0.0
+  smooth_page_indicator: ^1.2.1
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +28,16 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
+  assets: 
+    - assets/images/
+    - assets/fonts/
+    - assets/icons/
+    - .env
+  fonts:
+    - family: ProductSans
+      fonts:
+        - asset: assets/fonts/ProductSans-Regular.ttf
+        - asset: assets/fonts/ProductSans-Bold.ttf
+          weight: 700
+
