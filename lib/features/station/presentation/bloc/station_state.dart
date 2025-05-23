@@ -6,9 +6,8 @@ class StationLoading extends StationState {}
 
 class StationSuccess extends StationState {
   final Map<String, dynamic> response;
-  final String message;
 
-  StationSuccess({required this.response, required this.message});
+  StationSuccess({required this.response, required String message});
 }
 
 class StationFailure extends StationState {
@@ -22,3 +21,4 @@ class StationNotFound extends StationState {
 
   StationNotFound({required this.message});
 }
+

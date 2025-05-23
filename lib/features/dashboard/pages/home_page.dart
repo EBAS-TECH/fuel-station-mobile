@@ -4,6 +4,9 @@ import 'package:station_manager/core/themes/app_palette.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_event.dart';
 import 'package:station_manager/features/auth/presentation/pages/login_page.dart';
+import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_bloc.dart';
+import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_event.dart';
+import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_state.dart';
 import 'package:station_manager/features/station/presentation/bloc/station_bloc.dart';
 import 'package:station_manager/features/station/presentation/bloc/station_event.dart';
 import 'package:station_manager/features/station/presentation/bloc/station_state.dart';
@@ -21,6 +24,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late String _stationId;
   bool _petrolAvailable = true;
   bool _dieselAvailable = true;
 
@@ -62,6 +66,33 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _checkFuelAvailability(String stationId) {
+    context.read<FuelAvailablityBloc>().add(
+      CheckPetrolAvailabilityEvent(stationId: stationId, fuelType: 'PETROL'),
+    );
+    context.read<FuelAvailablityBloc>().add(
+      CheckDieselAvailabilityEvent(stationId: stationId, fuelType: 'DIESEL'),
+    );
+  }
+
+  void _changeFuelAvailability(String fuelType, bool isAvailable) {
+    if (fuelType == 'PETROL') {
+      context.read<FuelAvailablityBloc>().add(
+        ChangePetrolAvailabilityEvent(
+          stationId: _stationId,
+          fuelType: fuelType,
+        ),
+      );
+    } else {
+      context.read<FuelAvailablityBloc>().add(
+        ChangeDieselAvailabilityEvent(
+          stationId: _stationId,
+          fuelType: fuelType,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.userId == null) {
@@ -74,47 +105,80 @@ class _HomePageState extends State<HomePage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Station Manager',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<StationBloc, StationState>(
+          listener: (context, state) {
+            if (state is StationSuccess) {
+              setState(() {
+                _stationId = state.response['data']['id'];
+              });
+              _checkFuelAvailability(_stationId);
+            }
+          },
         ),
-        backgroundColor: AppPallete.primaryColor,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      drawer: BlocBuilder<UserBloc, UserState>(
-        builder: (context, state) {
-          if (state is UserSuccess) {
-            final user = state.responseData["data"];
-            return _buildProfileDrawer(context, user);
-          } else if (state is UserFailure) {
-            return Drawer(
+        BlocListener<FuelAvailablityBloc, FuelAvailabilityState>(
+          listener: (context, state) {
+            if (state is FuelAvailabilitySuccess) {
+              if (state.response['fuel_type'] == 'PETROL') {
+                setState(() {
+                  _petrolAvailable = state.response['available'] ?? true;
+                });
+              } else if (state.response['fuel_type'] == 'DIESEL') {
+                setState(() {
+                  _dieselAvailable = state.response['available'] ?? true;
+                });
+              }
+            } else if (state is FuelAvailabilityError) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
+            }
+          },
+        ),
+      ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Station Manager',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: AppPallete.primaryColor,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        drawer: BlocBuilder<UserBloc, UserState>(
+          builder: (context, state) {
+            if (state is UserSuccess) {
+              final user = state.responseData["data"];
+              return _buildProfileDrawer(context, user);
+            } else if (state is UserFailure) {
+              return Drawer(
+                backgroundColor: Colors.white,
+                child: Center(child: Text('Error loading profile')),
+              );
+            }
+            return const Drawer(
               backgroundColor: Colors.white,
-              child: Center(child: Text('Error loading profile')),
+              child: Center(child: CircularProgressIndicator()),
             );
-          }
-          return const Drawer(
-            backgroundColor: Colors.white,
-            child: Center(child: CircularProgressIndicator()),
-          );
-        },
-      ),
-      body: BlocBuilder<StationBloc, StationState>(
-        builder: (context, state) {
-          if (state is StationLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is StationSuccess) {
-            final station = state.response['data'];
-            return _buildStationContent(context, station);
-          } else if (state is StationFailure) {
-            return Center(child: Text('Error: ${state.error}'));
-          } else if (state is StationNotFound) {
-            return Center(child: Text(state.message));
-          }
-          return const Center(child: Text('No station data available'));
-        },
+          },
+        ),
+        body: BlocBuilder<StationBloc, StationState>(
+          builder: (context, state) {
+            if (state is StationLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is StationSuccess) {
+              final station = state.response['data'];
+              return _buildStationContent(context, station);
+            } else if (state is StationFailure) {
+              return Center(child: Text('Error: ${state.error}'));
+            } else if (state is StationNotFound) {
+              return Center(child: Text(state.message));
+            }
+            return const Center(child: Text('No station data available'));
+          },
+        ),
       ),
     );
   }
@@ -141,8 +205,8 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: 80,
+                      height: 80,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
@@ -305,9 +369,10 @@ class _HomePageState extends State<HomePage> {
                         setState(() {
                           _petrolAvailable = value;
                         });
+                        _changeFuelAvailability('PETROL', value);
                       },
                       icon: Icons.local_gas_station,
-                      activeColor: Colors.green,
+                      activeColor: _petrolAvailable ? Colors.green : Colors.red,
                     ),
                     const Divider(height: 1, indent: 16, endIndent: 16),
                     _buildFuelSwitchTile(
@@ -321,9 +386,10 @@ class _HomePageState extends State<HomePage> {
                         setState(() {
                           _dieselAvailable = value;
                         });
+                        _changeFuelAvailability('DIESEL', value);
                       },
                       icon: Icons.local_gas_station,
-                      activeColor: Colors.blue,
+                      activeColor: _dieselAvailable ? Colors.green : Colors.red,
                     ),
                   ],
                 ),
@@ -331,7 +397,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        SliverPadding(
+        /*      SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
           sliver: SliverToBoxAdapter(
             child: Text(
@@ -411,7 +477,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-        ),
+        ), */
         const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
       ],
     );
@@ -629,3 +695,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+

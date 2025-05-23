@@ -10,6 +10,7 @@ import 'package:station_manager/core/utils/token_services.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:station_manager/features/auth/presentation/pages/login_page.dart';
 import 'package:station_manager/features/dashboard/pages/home_page.dart';
+import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_bloc.dart';
 import 'package:station_manager/features/station/presentation/bloc/station_bloc.dart';
 import 'package:station_manager/features/user/presentation/bloc/user_bloc.dart';
 import 'package:station_manager/l10n/app_localizations.dart';
@@ -38,6 +39,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<AuthBloc>()),
         BlocProvider(create: (_) => sl<UserBloc>()),
         BlocProvider(create: (_) => sl<StationBloc>()),
+        BlocProvider(create: (_) => sl<FuelAvailablityBloc>()),
         BlocProvider(create: (_) => LocaleBloc()),
       ],
       child: Builder(
@@ -80,3 +82,4 @@ class MainApp extends StatelessWidget {
     );
   }
 }
+

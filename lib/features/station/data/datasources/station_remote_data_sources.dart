@@ -16,7 +16,7 @@ class StationRemoteDataSources {
     try {
       final token = await tokenService.getAuthToken();
       print(token);
-      final response = await http.get(
+            final response = await http.get(
         Uri.parse('$baseUrl/$id'),
         headers: {
           "Content-Type": "application/json",
@@ -25,7 +25,7 @@ class StationRemoteDataSources {
       );
 
       final responseData = jsonDecode(response.body);
-      print(responseData);
+      print("station $responseData");
       switch (response.statusCode) {
         case 200:
           return responseData;
@@ -51,3 +51,4 @@ class StationRemoteDataSources {
     }
   }
 }
+

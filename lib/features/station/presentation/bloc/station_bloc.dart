@@ -9,6 +9,7 @@ class StationBloc extends Bloc<StationEvent, StationState> {
   StationBloc({required this.getStationByIdUsecase}) : super(StationInitial()) {
     on<GetStationIdEvent>(_onGetStation);
   }
+  
   Future<void> _onGetStation(
     GetStationIdEvent event,
     Emitter<StationState> emit,
@@ -20,9 +21,11 @@ class StationBloc extends Bloc<StationEvent, StationState> {
       if (response['data'] == null) {
         emit(StationNotFound(message: "Station not found"));
       } else {
-        print(response["data"]);
         emit(
-          StationSuccess(message: "Successfully fetched", response: response),
+          StationSuccess(
+            message: "Successfully fetched", 
+            response: response,
+          ),
         );
       }
     } catch (e) {
@@ -30,3 +33,4 @@ class StationBloc extends Bloc<StationEvent, StationState> {
     }
   }
 }
+

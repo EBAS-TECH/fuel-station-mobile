@@ -515,4 +515,7 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get passwordErrorSpecialChar => 'ቢያንስ አንድ ልዩ ምልክት ሊኖረው ይገባል';
+
+  @override
+  String get stationLogin => 'Station Login';
 }

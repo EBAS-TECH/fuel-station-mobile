@@ -1090,6 +1090,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Must contain at least one special character'**
   String get passwordErrorSpecialChar;
+
+  /// No description provided for @stationLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Station Login'**
+  String get stationLogin;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

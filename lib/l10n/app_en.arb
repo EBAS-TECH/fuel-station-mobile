@@ -191,7 +191,8 @@
 "passwordErrorNumber": "Must contain at least one number",
 "passwordErrorSpecialChar": "Must contain at least one special character",
 "passwordErrorLength": "Password must be at least 8 characters long",
-"passwordErrorEmpty": "Password field must be filled"
+"passwordErrorEmpty": "Password field must be filled",
 
+"stationLogin": "Station Login"
 }
 

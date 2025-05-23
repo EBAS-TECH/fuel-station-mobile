@@ -75,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: MediaQuery.of(context).size.width * 0.5,
               ),
               Text(
-                l10n.loginTitle,
+                l10n.stationLogin,
                 style: theme.textTheme.headlineLarge?.copyWith(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,

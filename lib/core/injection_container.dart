@@ -7,6 +7,14 @@ import 'package:station_manager/features/auth/domain/repositories/auth_repositor
 import 'package:station_manager/features/auth/domain/usecase/login_usecase.dart';
 import 'package:station_manager/features/auth/domain/usecase/logout_usecase.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:station_manager/features/fuel_avaliabilty/data/datasources/fuel_avaliablity_remote_data_source.dart';
+import 'package:station_manager/features/fuel_avaliabilty/data/repositories/fuel_avilabilty_impl.dart';
+import 'package:station_manager/features/fuel_avaliabilty/domain/repositories/fuel_avaliabilty_repository.dart';
+import 'package:station_manager/features/fuel_avaliabilty/domain/usecases/change_diesel_avaliablity_usecase.dart';
+import 'package:station_manager/features/fuel_avaliabilty/domain/usecases/change_petrol_avaliablity_usecase.dart';
+import 'package:station_manager/features/fuel_avaliabilty/domain/usecases/check_diesel_avaliabilty_usecase.dart';
+import 'package:station_manager/features/fuel_avaliabilty/domain/usecases/check_petrol_avaliabilty_usecase.dart';
+import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_bloc.dart';
 import 'package:station_manager/features/station/data/datasources/station_remote_data_sources.dart';
 import 'package:station_manager/features/station/data/repositories/station_repository_impl.dart';
 import 'package:station_manager/features/station/domain/repositories/station_repository.dart';
@@ -74,4 +82,43 @@ void setUpDependencies() async {
   sl.registerLazySingleton(
     () => StationBloc(getStationByIdUsecase: sl<GetStationByIdUsecase>()),
   );
+
+  sl.registerLazySingleton(
+    () => FuelAvaliablityRemoteDataSource(tokenService: sl<TokenService>()),
+  );
+  sl.registerLazySingleton<FuelAvaliabiltyRepository>(
+    () => FuelAvilabiltyImpl(
+      fuelAvaliablityRemoteDataSource: sl<FuelAvaliablityRemoteDataSource>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => CheckPetrolAvaliabiltyUsecase(
+      fuelAvaliabiltyRepository: sl<FuelAvaliabiltyRepository>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => ChangePetrolAvaliablityUsecase(
+      fuelAvaliabiltyRepository: sl<FuelAvaliabiltyRepository>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => CheckDieselAvaliabiltyUsecase(
+      fuelAvaliabiltyRepository: sl<FuelAvaliabiltyRepository>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => ChangeDieselAvaliablityUsecase(
+      fuelAvaliabiltyRepository: sl<FuelAvaliabiltyRepository>(),
+    ),
+  );
+  sl.registerLazySingleton(
+    () => FuelAvailablityBloc(
+      checkPetrolAvaliabiltyUsecase: sl<CheckPetrolAvaliabiltyUsecase>(),
+      checkDieselAvaliabiltyUsecase: sl<CheckDieselAvaliabiltyUsecase>(),
+      changePetrolAvaliablityUsecase: sl<ChangePetrolAvaliablityUsecase>(),
+      changeDieselAvaliablityUsecase: sl<ChangeDieselAvaliablityUsecase>(),
+      stationBloc: sl<StationBloc>(),
+    ),
+  );
 }
+

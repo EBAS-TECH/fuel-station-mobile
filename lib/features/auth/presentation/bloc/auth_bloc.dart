@@ -45,7 +45,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await tokenService.clearAll();
         return;
       }
-      emit(AuthLogInSucess(message: "Successfully logged", responseData: userData));
+      if (userData["station_approved"] != true) {
+        emit(AuthFailure(error: "Station is not verifedd"));
+        await tokenService.clearAll();
+        return;
+      }
+      emit(
+        AuthLogInSucess(message: "Successfully logged", responseData: userData),
+      );
       final elapsed = stopwatch.elapsedMilliseconds;
       if (elapsed < _minimumLoadingTime) {
         await Future.delayed(

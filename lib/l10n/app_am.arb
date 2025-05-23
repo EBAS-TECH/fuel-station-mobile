@@ -11,6 +11,7 @@
   "loginButton": "ግባ",
   "notRegistered": "አልተመዘገብክም? ",
   "register": "ይመዝገቡ",
+  "stationLogin": "Station Login",
 
   "registerTitle": "መለያ ይፍጠሩ",
   "registerSubtitle": "ለመመዝገብ ኢሜል እና የይለፍ ቃል ያስገቡ",

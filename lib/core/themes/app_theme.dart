@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:station_manager/core/themes/app_palette.dart';
 import 'package:station_manager/core/themes/text_theme.dart';
 
@@ -12,7 +13,16 @@ class AppTheme {
 
   static final lightThemeMode = ThemeData(
     scaffoldBackgroundColor: Colors.white,
-    appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.white,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    ),
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.green,
       primary: Colors.green,
@@ -71,6 +81,13 @@ class AppTheme {
     appBarTheme: const AppBarTheme(
       backgroundColor: AppPallete.darkBackgroundColor,
       foregroundColor: AppPallete.whiteColor,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: AppPallete.darkBackgroundColor,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
     ),
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppPallete.primaryColor,

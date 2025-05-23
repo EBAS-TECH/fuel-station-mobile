@@ -515,4 +515,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordErrorSpecialChar => 'Must contain at least one special character';
+
+  @override
+  String get stationLogin => 'Station Login';
 }
