@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:station_manager/core/themes/app_palette.dart';
-import 'package:station_manager/core/utils/token_services.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_event.dart';
 import 'package:station_manager/features/auth/presentation/pages/login_page.dart';
-import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_bloc.dart';
-import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_event.dart';
-import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_state.dart';
-import 'package:station_manager/features/station/presentation/bloc/station_bloc.dart';
-import 'package:station_manager/features/station/presentation/bloc/station_event.dart';
-import 'package:station_manager/features/station/presentation/bloc/station_state.dart';
+import 'package:station_manager/features/dashboard/pages/fuel_page.dart';
+import 'package:station_manager/features/dashboard/pages/station_page.dart';
+import 'package:station_manager/features/dashboard/widgets/bottom_nav_bar.dart';
 import 'package:station_manager/features/user/presentation/bloc/user_bloc.dart';
 import 'package:station_manager/features/user/presentation/bloc/user_event.dart';
 import 'package:station_manager/features/user/presentation/bloc/user_state.dart';
 import 'package:station_manager/l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
-  final String? userId;
+  final String userId;
   const HomePage({super.key, required this.userId});
 
   @override
@@ -26,16 +21,28 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late TokenService _tokenService;
+  int currentIndex = 0;
+  late final List<Widget> _pages;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    _tokenService = context.read<TokenService>();
-    if (widget.userId != null) {
-      context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId!));
-      context.read<StationBloc>().add(GetStationIdEvent(id: widget.userId!));
-    }
+    _pages = [
+      StationPage(
+        key: ValueKey('station_${widget.userId}'),
+        userId: widget.userId,
+        scaffoldKey: _scaffoldKey,
+      ),
+      FuelPage(
+        key: ValueKey('fuel_${widget.userId}'),
+        userId: widget.userId,
+        scaffoldKey: _scaffoldKey,
+      ),
+    ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId));
+    });
   }
 
   Future<void> _handleLogOut(BuildContext context) async {
@@ -67,437 +74,49 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _checkFuelAvailability(String stationId) {
-    context.read<FuelAvailablityBloc>().add(
-      CheckPetrolAvailabilityEvent(stationId: stationId, fuelType: 'PETROL'),
-    );
-    context.read<FuelAvailablityBloc>().add(
-      CheckDieselAvailabilityEvent(stationId: stationId, fuelType: 'DIESEL'),
-    );
-  }
-
-  void _changeFuelAvailability(String fuelType, bool isAvailable) {
-    final stationId = _tokenService.getStationId();
-
-    if (stationId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Station ID not found')));
-      return;
-    }
-
-    if (fuelType == 'PETROL') {
-      context.read<FuelAvailablityBloc>().add(
-        ChangePetrolAvailabilityEvent(stationId: stationId, fuelType: fuelType),
-      );
-    } else {
-      context.read<FuelAvailablityBloc>().add(
-        ChangeDieselAvailabilityEvent(stationId: stationId, fuelType: fuelType),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (widget.userId == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (route) => false,
-        );
-      });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<StationBloc, StationState>(
-          listener: (context, state) {
-            if (state is StationSuccess) {
-              final stationId = state.response['data']['id'];
-              _tokenService.saveStationId(stationId);
-              _checkFuelAvailability(stationId);
-            }
-          },
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: const Text(
+          'Station Manager',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        BlocListener<FuelAvailablityBloc, FuelAvailabilityState>(
-          listener: (context, state) {
-            if (state is FuelAvailabilityError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)));
-            }
-          },
+        backgroundColor: AppPallete.primaryColor,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
-      ],
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Station Manager',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: AppPallete.primaryColor,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
-        drawer: BlocBuilder<UserBloc, UserState>(
-          builder: (context, state) {
-            if (state is UserSuccess) {
-              final user = state.responseData["data"];
-              return _buildProfileDrawer(context, user);
-            } else if (state is UserFailure) {
-              return Drawer(
-                backgroundColor: Colors.white,
-                child: Center(child: Text('Error loading profile')),
-              );
-            }
-            return const Drawer(
+      ),
+      drawer: BlocBuilder<UserBloc, UserState>(
+        builder: (context, state) {
+          if (state is UserSuccess) {
+            final user = state.responseData["data"];
+            return _buildProfileDrawer(context, user);
+          } else if (state is UserFailure) {
+            return Drawer(
               backgroundColor: Colors.white,
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: Text('Error loading profile')),
             );
-          },
-        ),
-        body: BlocBuilder<StationBloc, StationState>(
-          builder: (context, state) {
-            if (state is StationLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is StationSuccess) {
-              final station = state.response['data'];
-              return BlocBuilder<FuelAvailablityBloc, FuelAvailabilityState>(
-                builder: (context, fuelState) {
-                  bool petrolAvailable = false;
-                  bool dieselAvailable = false;
-
-                  if (fuelState is PetrolAvailabilitySuccess) {
-                    petrolAvailable = fuelState.response['data'] == 'true';
-                  } else if (fuelState is DiselAvailabilitySuccess) {
-                    dieselAvailable = fuelState.response['data'] == 'true';
-                  }
-
-                  return _buildStationContent(
-                    context,
-                    station,
-                    petrolAvailable: petrolAvailable,
-                    dieselAvailable: dieselAvailable,
-                  );
-                },
-              );
-            } else if (state is StationFailure) {
-              return Center(child: Text('Error: ${state.error}'));
-            } else if (state is StationNotFound) {
-              return Center(child: Text(state.message));
-            }
-            return const Center(child: Text('No station data available'));
-          },
-        ),
+          }
+          return const Drawer(
+            backgroundColor: Colors.white,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        },
       ),
-    );
-  }
-
-  Widget _buildStationContent(
-    BuildContext context,
-    Map<String, dynamic> station, {
-    required bool petrolAvailable,
-    required bool dieselAvailable,
-  }) {
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
-
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppPallete.primaryColor.withOpacity(0.3),
-                          width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: Image.network(
-                          station['logo'] ??
-                              'https://img.icons8.com/color/96/gas-pump.png',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Icon(
-                            Icons.local_gas_station,
-                            size: 50,
-                            color: AppPallete.primaryColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      station['en_name'] ?? 'Station Name',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      station['am_name'] ?? 'ጣቢያ',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: isDarkMode ? Colors.white70 : Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: station['status'] == 'VERIFIED'
-                            ? Colors.green.withOpacity(0.2)
-                            : Colors.orange.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: station['status'] == 'VERIFIED'
-                              ? Colors.green
-                              : Colors.orange,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        station['status'] ?? 'UNKNOWN',
-                        style: TextStyle(
-                          color: station['status'] == 'VERIFIED'
-                              ? Colors.green
-                              : Colors.orange,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          sliver: SliverToBoxAdapter(
-            child: Text(
-              'Station Details',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
-            ),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1.5,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-            ),
-            delegate: SliverChildListDelegate([
-              _buildDetailTile(
-                context,
-                icon: Icons.assignment_ind,
-                title: 'TIN Number',
-                value: station['tin_number'] ?? 'N/A',
-              ),
-              _buildDetailTile(
-                context,
-                icon: Icons.location_on,
-                title: 'Address',
-                value: station['address'] ?? 'N/A',
-              ),
-              _buildDetailTile(
-                context,
-                icon: Icons.calendar_today,
-                title: 'Registered Since',
-                value: station['created_at'] != null
-                    ? station['created_at'].toString().split('T')[0]
-                    : 'N/A',
-              ),
-            ]),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-          sliver: SliverToBoxAdapter(
-            child: Text(
-              'Fuel Availability',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
-            ),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverToBoxAdapter(
-            child: Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  children: [
-                    _buildFuelSwitchTile(
-                      context,
-                      title: 'Petrol',
-                      subtitle: petrolAvailable ? 'Available' : 'Not Available',
-                      value: petrolAvailable,
-                      onChanged: (value) {
-                        _changeFuelAvailability('PETROL', value);
-                      },
-                      icon: Icons.local_gas_station,
-                      activeColor: petrolAvailable ? Colors.green : Colors.red,
-                    ),
-                    const Divider(height: 1, indent: 16, endIndent: 16),
-                    _buildFuelSwitchTile(
-                      context,
-                      title: 'Diesel',
-                      subtitle: dieselAvailable ? 'Available' : 'Not Available',
-                      value: dieselAvailable,
-                      onChanged: (value) {
-                        _changeFuelAvailability('DIESEL', value);
-                      },
-                      icon: Icons.local_gas_station,
-                      activeColor: dieselAvailable ? Colors.green : Colors.red,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
-      ],
-    );
-  }
-
-  Widget _buildDetailTile(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
-
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AppPallete.primaryColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, size: 20, color: AppPallete.primaryColor),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDarkMode ? Colors.white70 : Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  value,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white : Colors.black87,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      body: _pages[currentIndex],
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: currentIndex,
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+        },
       ),
-    );
-  }
-
-  Widget _buildFuelSwitchTile(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    required IconData icon,
-    required Color activeColor,
-  }) {
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
-
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: activeColor.withOpacity(0.2),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: activeColor),
-      ),
-      title: Text(
-        title,
-        style: theme.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: isDarkMode ? Colors.white : Colors.black87,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: isDarkMode ? Colors.white70 : Colors.black54,
-        ),
-      ),
-      trailing: Transform.scale(
-        scale: 0.9,
-        child: Switch(
-          value: value,
-          onChanged: onChanged,
-          activeColor: activeColor,
-          activeTrackColor: activeColor.withOpacity(0.5),
-          inactiveThumbColor: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-          inactiveTrackColor: isDarkMode ? Colors.grey[600] : Colors.grey[300],
-        ),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-      minVerticalPadding: 0,
     );
   }
 
@@ -550,17 +169,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            decoration: BoxDecoration(
-              color: AppPallete.primaryColor,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppPallete.primaryColor,
-                  AppPallete.primaryColor.withOpacity(0.8),
-                ],
-              ),
-            ),
+            decoration: BoxDecoration(color: AppPallete.primaryColor),
           ),
           Expanded(
             child: ListView(
