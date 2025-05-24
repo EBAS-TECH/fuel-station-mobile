@@ -35,7 +35,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final userId = response["user"]["id"];
       final token = response["token"] ?? "";
       final userData = response["user"];
-      print(userData);
       final role = response["user"]["role"] as String;
 
       await tokenService.saveToken(token);

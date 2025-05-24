@@ -80,7 +80,10 @@ void setUpDependencies() async {
     () => GetStationByIdUsecase(stationRepository: sl<StationRepository>()),
   );
   sl.registerLazySingleton(
-    () => StationBloc(getStationByIdUsecase: sl<GetStationByIdUsecase>()),
+    () => StationBloc(
+      getStationByIdUsecase: sl<GetStationByIdUsecase>(),
+      tokenService: sl<TokenService>(),
+    ),
   );
 
   sl.registerLazySingleton(

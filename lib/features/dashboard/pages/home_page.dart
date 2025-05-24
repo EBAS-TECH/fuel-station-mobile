@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:station_manager/core/themes/app_palette.dart';
+import 'package:station_manager/core/utils/token_services.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:station_manager/features/auth/presentation/bloc/auth_event.dart';
 import 'package:station_manager/features/auth/presentation/pages/login_page.dart';
@@ -24,13 +26,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late String _stationId;
-  bool _petrolAvailable = true;
-  bool _dieselAvailable = true;
+  late TokenService _tokenService;
 
   @override
   void initState() {
     super.initState();
+    _tokenService = context.read<TokenService>();
     if (widget.userId != null) {
       context.read<UserBloc>().add(GetUserByIdEvent(userId: widget.userId!));
       context.read<StationBloc>().add(GetStationIdEvent(id: widget.userId!));
@@ -76,19 +77,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _changeFuelAvailability(String fuelType, bool isAvailable) {
+    final stationId = _tokenService.getStationId();
+
+    if (stationId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Station ID not found')));
+      return;
+    }
+
     if (fuelType == 'PETROL') {
       context.read<FuelAvailablityBloc>().add(
-        ChangePetrolAvailabilityEvent(
-          stationId: _stationId,
-          fuelType: fuelType,
-        ),
+        ChangePetrolAvailabilityEvent(stationId: stationId, fuelType: fuelType),
       );
     } else {
       context.read<FuelAvailablityBloc>().add(
-        ChangeDieselAvailabilityEvent(
-          stationId: _stationId,
-          fuelType: fuelType,
-        ),
+        ChangeDieselAvailabilityEvent(stationId: stationId, fuelType: fuelType),
       );
     }
   }
@@ -110,29 +113,17 @@ class _HomePageState extends State<HomePage> {
         BlocListener<StationBloc, StationState>(
           listener: (context, state) {
             if (state is StationSuccess) {
-              setState(() {
-                _stationId = state.response['data']['id'];
-              });
-              _checkFuelAvailability(_stationId);
+              final stationId = state.response['data']['id'];
+              _tokenService.saveStationId(stationId);
+              _checkFuelAvailability(stationId);
             }
           },
         ),
         BlocListener<FuelAvailablityBloc, FuelAvailabilityState>(
           listener: (context, state) {
-            if (state is FuelAvailabilitySuccess) {
-              if (state.response['fuel_type'] == 'PETROL') {
-                setState(() {
-                  _petrolAvailable = state.response['available'] ?? true;
-                });
-              } else if (state.response['fuel_type'] == 'DIESEL') {
-                setState(() {
-                  _dieselAvailable = state.response['available'] ?? true;
-                });
-              }
-            } else if (state is FuelAvailabilityError) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
+            if (state is FuelAvailabilityError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)));
             }
           },
         ),
@@ -170,7 +161,25 @@ class _HomePageState extends State<HomePage> {
               return const Center(child: CircularProgressIndicator());
             } else if (state is StationSuccess) {
               final station = state.response['data'];
-              return _buildStationContent(context, station);
+              return BlocBuilder<FuelAvailablityBloc, FuelAvailabilityState>(
+                builder: (context, fuelState) {
+                  bool petrolAvailable = false;
+                  bool dieselAvailable = false;
+
+                  if (fuelState is PetrolAvailabilitySuccess) {
+                    petrolAvailable = fuelState.response['data'] == 'true';
+                  } else if (fuelState is DiselAvailabilitySuccess) {
+                    dieselAvailable = fuelState.response['data'] == 'true';
+                  }
+
+                  return _buildStationContent(
+                    context,
+                    station,
+                    petrolAvailable: petrolAvailable,
+                    dieselAvailable: dieselAvailable,
+                  );
+                },
+              );
             } else if (state is StationFailure) {
               return Center(child: Text('Error: ${state.error}'));
             } else if (state is StationNotFound) {
@@ -185,8 +194,10 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildStationContent(
     BuildContext context,
-    Map<String, dynamic> station,
-  ) {
+    Map<String, dynamic> station, {
+    required bool petrolAvailable,
+    required bool dieselAvailable,
+  }) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
@@ -211,8 +222,7 @@ class _HomePageState extends State<HomePage> {
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: AppPallete.primaryColor.withOpacity(0.3),
-                          width: 2,
-                        ),
+                          width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -325,12 +335,6 @@ class _HomePageState extends State<HomePage> {
                     ? station['created_at'].toString().split('T')[0]
                     : 'N/A',
               ),
-              _buildDetailTile(
-                context,
-                icon: Icons.phone,
-                title: 'Contact',
-                value: station['phone'] ?? 'N/A',
-              ),
             ]),
           ),
         ),
@@ -361,35 +365,25 @@ class _HomePageState extends State<HomePage> {
                     _buildFuelSwitchTile(
                       context,
                       title: 'Petrol',
-                      subtitle: _petrolAvailable
-                          ? 'Available'
-                          : 'Not Available',
-                      value: _petrolAvailable,
+                      subtitle: petrolAvailable ? 'Available' : 'Not Available',
+                      value: petrolAvailable,
                       onChanged: (value) {
-                        setState(() {
-                          _petrolAvailable = value;
-                        });
                         _changeFuelAvailability('PETROL', value);
                       },
                       icon: Icons.local_gas_station,
-                      activeColor: _petrolAvailable ? Colors.green : Colors.red,
+                      activeColor: petrolAvailable ? Colors.green : Colors.red,
                     ),
                     const Divider(height: 1, indent: 16, endIndent: 16),
                     _buildFuelSwitchTile(
                       context,
                       title: 'Diesel',
-                      subtitle: _dieselAvailable
-                          ? 'Available'
-                          : 'Not Available',
-                      value: _dieselAvailable,
+                      subtitle: dieselAvailable ? 'Available' : 'Not Available',
+                      value: dieselAvailable,
                       onChanged: (value) {
-                        setState(() {
-                          _dieselAvailable = value;
-                        });
                         _changeFuelAvailability('DIESEL', value);
                       },
                       icon: Icons.local_gas_station,
-                      activeColor: _dieselAvailable ? Colors.green : Colors.red,
+                      activeColor: dieselAvailable ? Colors.green : Colors.red,
                     ),
                   ],
                 ),
@@ -397,87 +391,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        /*      SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-          sliver: SliverToBoxAdapter(
-            child: Text(
-              'Location',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
-            ),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverToBoxAdapter(
-            child: Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_pin,
-                          color: AppPallete.primaryColor,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Coordinates',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isDarkMode
-                                      ? Colors.white70
-                                      : Colors.black54,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${station['latitude'] ?? 'N/A'}, ${station['longitude'] ?? 'N/A'}',
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          // TODO: Implement map view
-                        },
-                        icon: const Icon(Icons.map, size: 20),
-                        label: const Text('View on Map'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppPallete.primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ), */
         const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
       ],
     );

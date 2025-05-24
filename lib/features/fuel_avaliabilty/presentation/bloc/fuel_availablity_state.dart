@@ -4,10 +4,15 @@ class FuelAvailabilityInitial extends FuelAvailabilityState {}
 
 class FuelAvailabilityLoading extends FuelAvailabilityState {}
 
-class FuelAvailabilitySuccess extends FuelAvailabilityState {
+class PetrolAvailabilitySuccess extends FuelAvailabilityState {
   final Map<String, dynamic> response;
 
-  FuelAvailabilitySuccess(this.response);
+  PetrolAvailabilitySuccess(this.response);
+}
+class DiselAvailabilitySuccess extends FuelAvailabilityState {
+  final Map<String, dynamic> response;
+
+  DiselAvailabilitySuccess(this.response);
 }
 
 class FuelAvailabilityError extends FuelAvailabilityState {

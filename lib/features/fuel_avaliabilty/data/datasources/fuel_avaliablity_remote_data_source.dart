@@ -17,7 +17,7 @@ class FuelAvaliablityRemoteDataSource {
   ) async {
     try {
       final token = await tokenService.getAuthToken();
-      final response = await http.post(
+      final response = await http.put(
         Uri.parse('$baseUrl/IsAvailable/$stationId'),
         body: jsonEncode({"fuel_type": fuelType}),
         headers: {
@@ -27,6 +27,7 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
+      print("fuel av $responseData");
       switch (response.statusCode) {
         case 200:
           return responseData;
@@ -43,10 +44,6 @@ class FuelAvaliablityRemoteDataSource {
             message: 'Error occurred while communicating with server',
           );
       }
-    } on http.ClientException catch (e) {
-      throw FetchDataException(message: e.message);
-    } on FormatException catch (_) {
-      throw FormatException(message: 'Invalid response format');
     } catch (e) {
       throw ExceptionHandler.handleError(e);
     }
@@ -58,7 +55,7 @@ class FuelAvaliablityRemoteDataSource {
   ) async {
     try {
       final token = await tokenService.getAuthToken();
-      final response = await http.post(
+      final response = await http.put(
         Uri.parse('$baseUrl/IsAvailable/$stationId'),
         body: jsonEncode({"station_id": stationId, "fuel_type": fuelType}),
         headers: {
@@ -68,6 +65,7 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
+      print(responseData);
       switch (response.statusCode) {
         case 200:
           return responseData;
@@ -109,6 +107,7 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
+      print(responseData);
       switch (response.statusCode) {
         case 200:
           return responseData;

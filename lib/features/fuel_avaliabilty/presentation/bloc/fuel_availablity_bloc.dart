@@ -39,7 +39,8 @@ class FuelAvailablityBloc
         event.stationId,
         event.fuelType,
       );
-      emit(FuelAvailabilitySuccess(response));
+     
+      emit(PetrolAvailabilitySuccess(response));
     } catch (e) {
       emit(FuelAvailabilityError(e.toString()));
     }
@@ -55,7 +56,7 @@ class FuelAvailablityBloc
         event.stationId,
         event.fuelType,
       );
-      emit(FuelAvailabilitySuccess(response));
+      emit(DiselAvailabilitySuccess(response));
     } catch (e) {
       emit(FuelAvailabilityError(e.toString()));
     }
@@ -71,7 +72,7 @@ class FuelAvailablityBloc
         event.stationId,
         event.fuelType,
       );
-      emit(FuelAvailabilitySuccess(response));
+      emit(PetrolAvailabilitySuccess(response));
       stationBloc.add(GetStationIdEvent(id: event.stationId));
     } catch (e) {
       emit(FuelAvailabilityError(e.toString()));
@@ -88,7 +89,7 @@ class FuelAvailablityBloc
         event.stationId,
         event.fuelType,
       );
-      emit(FuelAvailabilitySuccess(response));
+      emit(DiselAvailabilitySuccess(response));
       stationBloc.add(GetStationIdEvent(id: event.stationId));
     } catch (e) {
       emit(FuelAvailabilityError(e.toString()));

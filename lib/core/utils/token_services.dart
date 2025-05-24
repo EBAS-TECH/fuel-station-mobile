@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TokenService {
   static const _tokenKey = 'auth_token';
   static const _userIdKey = 'user_id';
+  static const _stationId = "station_id";
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final SharedPreferences? _prefs;
 
@@ -15,6 +16,14 @@ class TokenService {
 
   Future<String?> getToken() async {
     return await _secureStorage.read(key: _tokenKey);
+  }
+
+  Future<void> saveStationId(String stationId) async {
+    await _prefs?.setString(_stationId, stationId);
+  }
+
+  String? getStationId() {
+    return _prefs?.getString(_stationId);
   }
 
   Future<String> getAuthToken() async {
@@ -36,6 +45,7 @@ class TokenService {
   Future<void> clearAll() async {
     await _secureStorage.delete(key: _tokenKey);
     await _prefs?.remove(_userIdKey);
+    await _prefs?.remove(_stationId);
   }
 
   static const _seenOnboardingKey = 'seen_onboarding';
