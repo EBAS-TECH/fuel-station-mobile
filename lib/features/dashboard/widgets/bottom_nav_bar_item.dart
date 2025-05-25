@@ -48,7 +48,6 @@ class BottomNavBarItem extends StatelessWidget {
                     : AppPallete.lightIconColor,
               ),
             ),
-            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(

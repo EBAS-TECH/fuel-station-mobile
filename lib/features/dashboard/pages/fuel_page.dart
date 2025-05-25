@@ -4,15 +4,12 @@ import 'package:station_manager/core/utils/token_services.dart';
 import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_bloc.dart';
 import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_event.dart';
 import 'package:station_manager/features/fuel_avaliabilty/presentation/bloc/fuel_availablity_state.dart';
+
 class FuelPage extends StatefulWidget {
   final String userId;
   final GlobalKey<ScaffoldState> scaffoldKey;
-  
-  const FuelPage({
-    super.key,
-    required this.userId,
-    required this.scaffoldKey,
-  });
+
+  const FuelPage({super.key, required this.userId, required this.scaffoldKey});
 
   @override
   State<FuelPage> createState() => _FuelPageState();
@@ -20,15 +17,19 @@ class FuelPage extends StatefulWidget {
 
 class _FuelPageState extends State<FuelPage> {
   late TokenService _tokenService;
+  bool _petrolAvailable = false;
+  bool _dieselAvailable = false;
+  bool _isPetrolLoading = false;
+  bool _isDieselLoading = false;
 
   @override
   void initState() {
     super.initState();
     _tokenService = context.read<TokenService>();
-    _checkFuelAvailability();
+    _refreshData();
   }
 
-  void _checkFuelAvailability() {
+  Future<void> _refreshData() async {
     final stationId = _tokenService.getStationId();
     if (stationId != null) {
       context.read<FuelAvailablityBloc>().add(
@@ -40,14 +41,22 @@ class _FuelPageState extends State<FuelPage> {
     }
   }
 
-  void _changeFuelAvailability(String fuelType, bool isAvailable) {
+  void _changeFuelAvailability(String fuelType, bool currentValue) {
     final stationId = _tokenService.getStationId();
-
     if (stationId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Station ID not found')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Station ID not found')));
       return;
     }
+
+    setState(() {
+      if (fuelType == 'PETROL') {
+        _isPetrolLoading = true;
+      } else {
+        _isDieselLoading = true;
+      }
+    });
 
     if (fuelType == 'PETROL') {
       context.read<FuelAvailablityBloc>().add(
@@ -58,34 +67,49 @@ class _FuelPageState extends State<FuelPage> {
         ChangeDieselAvailabilityEvent(stationId: stationId, fuelType: fuelType),
       );
     }
+
+    // Refresh data after a short delay to ensure backend has processed the change
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _refreshData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<FuelAvailablityBloc, FuelAvailabilityState>(
       listener: (context, state) {
-        if (state is FuelAvailabilityError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)));
+        if (state is FuelAvailabilityUpdated) {
+          setState(() {
+            _petrolAvailable = state.petrolAvailable ?? _petrolAvailable;
+            _dieselAvailable = state.dieselAvailable ?? _dieselAvailable;
+            _isPetrolLoading = false;
+            _isDieselLoading = false;
+          });
+        } else if (state is FuelAvailabilityError) {
+          setState(() {
+            _isPetrolLoading = false;
+            _isDieselLoading = false;
+          });
+          if (!state.message.toLowerCase().contains('success')) {
+            debugPrint(state.message);
+          } else {
+            if (state.isPetrolError == true) {
+              _petrolAvailable = !_petrolAvailable;
+            } else {
+              _dieselAvailable = !_dieselAvailable;
+            }
+          }
         }
       },
-      child: BlocBuilder<FuelAvailablityBloc, FuelAvailabilityState>(
-        builder: (context, state) {
-          bool petrolAvailable = false;
-          bool dieselAvailable = false;
-
-          if (state is PetrolAvailabilitySuccess) {
-            petrolAvailable = state.response['data'] == 'true';
-          } else if (state is DiselAvailabilitySuccess) {
-            dieselAvailable = state.response['data'] == 'true';
-          }
-
-          return _buildFuelContent(
-            context,
-            petrolAvailable: petrolAvailable,
-            dieselAvailable: dieselAvailable,
-          );
-        },
+      child: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: _buildFuelContent(
+          context,
+          petrolAvailable: _petrolAvailable,
+          dieselAvailable: _dieselAvailable,
+          isPetrolLoading: _isPetrolLoading,
+          isDieselLoading: _isDieselLoading,
+        ),
       ),
     );
   }
@@ -94,6 +118,8 @@ class _FuelPageState extends State<FuelPage> {
     BuildContext context, {
     required bool petrolAvailable,
     required bool dieselAvailable,
+    required bool isPetrolLoading,
+    required bool isDieselLoading,
   }) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
@@ -129,11 +155,11 @@ class _FuelPageState extends State<FuelPage> {
                       title: 'Petrol',
                       subtitle: petrolAvailable ? 'Available' : 'Not Available',
                       value: petrolAvailable,
-                      onChanged: (value) {
-                        _changeFuelAvailability('PETROL', value);
-                      },
+                      onChanged: (value) =>
+                          _changeFuelAvailability('PETROL', value),
                       icon: Icons.local_gas_station,
                       activeColor: petrolAvailable ? Colors.green : Colors.red,
+                      isLoading: isPetrolLoading,
                     ),
                     const Divider(height: 1, indent: 16, endIndent: 16),
                     _buildFuelSwitchTile(
@@ -141,11 +167,11 @@ class _FuelPageState extends State<FuelPage> {
                       title: 'Diesel',
                       subtitle: dieselAvailable ? 'Available' : 'Not Available',
                       value: dieselAvailable,
-                      onChanged: (value) {
-                        _changeFuelAvailability('DIESEL', value);
-                      },
+                      onChanged: (value) =>
+                          _changeFuelAvailability('DIESEL', value),
                       icon: Icons.local_gas_station,
                       activeColor: dieselAvailable ? Colors.green : Colors.red,
+                      isLoading: isDieselLoading,
                     ),
                   ],
                 ),
@@ -153,7 +179,6 @@ class _FuelPageState extends State<FuelPage> {
             ),
           ),
         ),
-        const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
       ],
     );
   }
@@ -166,19 +191,26 @@ class _FuelPageState extends State<FuelPage> {
     required ValueChanged<bool> onChanged,
     required IconData icon,
     required Color activeColor,
+    required bool isLoading,
   }) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: activeColor.withOpacity(0.2),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: activeColor),
-      ),
+      leading: isLoading
+          ? const SizedBox(
+              width: 40,
+              height: 40,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          : Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: activeColor.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: activeColor),
+            ),
       title: Text(
         title,
         style: theme.textTheme.bodyLarge?.copyWith(
@@ -192,17 +224,24 @@ class _FuelPageState extends State<FuelPage> {
           color: isDarkMode ? Colors.white70 : Colors.black54,
         ),
       ),
-      trailing: Transform.scale(
-        scale: 0.9,
-        child: Switch(
-          value: value,
-          onChanged: onChanged,
-          activeColor: activeColor,
-          activeTrackColor: activeColor.withOpacity(0.5),
-          inactiveThumbColor: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-          inactiveTrackColor: isDarkMode ? Colors.grey[600] : Colors.grey[300],
-        ),
-      ),
+      trailing: isLoading
+          ? const SizedBox(
+              width: 48,
+              height: 24,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          : Switch.adaptive(
+              value: value,
+              onChanged: isLoading ? null : onChanged,
+              activeColor: activeColor,
+              activeTrackColor: activeColor.withOpacity(0.5),
+              inactiveThumbColor: isDarkMode
+                  ? Colors.grey[400]
+                  : Colors.grey[600],
+              inactiveTrackColor: isDarkMode
+                  ? Colors.grey[600]
+                  : Colors.grey[300],
+            ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
       minVerticalPadding: 0,
     );

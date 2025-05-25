@@ -26,6 +26,10 @@ class _StationPageState extends State<StationPage> {
     context.read<StationBloc>().add(GetStationIdEvent(id: widget.userId));
   }
 
+  Future <void>getStation()async{
+      context.read<StationBloc>().add(GetStationIdEvent(id: widget.userId));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<StationBloc, StationState>(
@@ -52,146 +56,149 @@ class _StationPageState extends State<StationPage> {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppPallete.primaryColor.withOpacity(0.3),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
+    return RefreshIndicator(
+      onRefresh: getStation,
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppPallete.primaryColor.withOpacity(0.3),
+                            width: 2,
                           ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: Image.network(
-                          station['logo'] ??
-                              'https://img.icons8.com/color/96/gas-pump.png',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Icon(
-                            Icons.local_gas_station,
-                            size: 50,
-                            color: AppPallete.primaryColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: Image.network(
+                            station['logo'] ??
+                                'https://img.icons8.com/color/96/gas-pump.png',
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.local_gas_station,
+                              size: 50,
+                              color: AppPallete.primaryColor,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      station['en_name'] ?? 'Station Name',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      station['am_name'] ?? 'ጣቢያ',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: isDarkMode ? Colors.white70 : Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: station['status'] == 'VERIFIED'
-                            ? Colors.green.withOpacity(0.2)
-                            : Colors.orange.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: station['status'] == 'VERIFIED'
-                              ? Colors.green
-                              : Colors.orange,
-                          width: 1,
-                        ),
-                      ),
-                      child: Text(
-                        station['status'] ?? 'UNKNOWN',
-                        style: TextStyle(
-                          color: station['status'] == 'VERIFIED'
-                              ? Colors.green
-                              : Colors.orange,
+                      const SizedBox(height: 16),
+                      Text(
+                        station['en_name'] ?? 'Station Name',
+                        style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black87,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        station['am_name'] ?? 'ጣቢያ',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: isDarkMode ? Colors.white70 : Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: station['status'] == 'VERIFIED'
+                              ? Colors.green.withOpacity(0.2)
+                              : Colors.orange.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: station['status'] == 'VERIFIED'
+                                ? Colors.green
+                                : Colors.orange,
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          station['status'] ?? 'UNKNOWN',
+                          style: TextStyle(
+                            color: station['status'] == 'VERIFIED'
+                                ? Colors.green
+                                : Colors.orange,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          sliver: SliverToBoxAdapter(
-            child: Text(
-              'Station Details',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black87,
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            sliver: SliverToBoxAdapter(
+              child: Text(
+                'Station Details',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black87,
+                ),
               ),
             ),
           ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1.5,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1.5,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              delegate: SliverChildListDelegate([
+                _buildDetailTile(
+                  context,
+                  icon: Icons.assignment_ind,
+                  title: 'TIN Number',
+                  value: station['tin_number'] ?? 'N/A',
+                ),
+                _buildDetailTile(
+                  context,
+                  icon: Icons.location_on,
+                  title: 'Address',
+                  value: station['address'] ?? 'N/A',
+                ),
+                _buildDetailTile(
+                  context,
+                  icon: Icons.calendar_today,
+                  title: 'Registered Since',
+                  value: station['created_at'] != null
+                      ? station['created_at'].toString().split('T')[0]
+                      : 'N/A',
+                ),
+              ]),
             ),
-            delegate: SliverChildListDelegate([
-              _buildDetailTile(
-                context,
-                icon: Icons.assignment_ind,
-                title: 'TIN Number',
-                value: station['tin_number'] ?? 'N/A',
-              ),
-              _buildDetailTile(
-                context,
-                icon: Icons.location_on,
-                title: 'Address',
-                value: station['address'] ?? 'N/A',
-              ),
-              _buildDetailTile(
-                context,
-                icon: Icons.calendar_today,
-                title: 'Registered Since',
-                value: station['created_at'] != null
-                    ? station['created_at'].toString().split('T')[0]
-                    : 'N/A',
-              ),
-            ]),
           ),
-        ),
-        const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
-      ],
+          const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+        ],
+      ),
     );
   }
 

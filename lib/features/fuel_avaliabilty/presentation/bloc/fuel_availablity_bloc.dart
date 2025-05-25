@@ -16,6 +16,9 @@ class FuelAvailablityBloc
   final ChangeDieselAvaliablityUsecase changeDieselAvaliablityUsecase;
   final StationBloc stationBloc;
 
+  bool _petrolAvailable = false;
+  bool _dieselAvailable = false;
+
   FuelAvailablityBloc({
     required this.checkPetrolAvaliabiltyUsecase,
     required this.checkDieselAvaliabiltyUsecase,
@@ -33,16 +36,39 @@ class FuelAvailablityBloc
     CheckPetrolAvailabilityEvent event,
     Emitter<FuelAvailabilityState> emit,
   ) async {
-    emit(FuelAvailabilityLoading());
+    emit(FuelAvailabilityLoading(isPetrolLoading: true));
     try {
       final response = await checkPetrolAvaliabiltyUsecase(
         event.stationId,
         event.fuelType,
       );
-     
-      emit(PetrolAvailabilitySuccess(response));
+
+      bool petrolAvailable;
+      if (response['data'] is bool) {
+        petrolAvailable = response['data'] as bool;
+      } else if (response['data'] is Map &&
+          response['data']['available'] != null) {
+        petrolAvailable = response['data']['available'] as bool;
+      } else {
+        throw Exception('Invalid response format for petrol availability');
+      }
+
+      _petrolAvailable = petrolAvailable;
+      emit(
+        FuelAvailabilityUpdated(
+          petrolAvailable: _petrolAvailable,
+          dieselAvailable: _dieselAvailable,
+        ),
+      );
     } catch (e) {
-      emit(FuelAvailabilityError(e.toString()));
+      emit(
+        FuelAvailabilityError(
+          e.toString(),
+          isPetrolError: true,
+          petrolAvailable: _petrolAvailable,
+          dieselAvailable: _dieselAvailable,
+        ),
+      );
     }
   }
 
@@ -50,15 +76,39 @@ class FuelAvailablityBloc
     CheckDieselAvailabilityEvent event,
     Emitter<FuelAvailabilityState> emit,
   ) async {
-    emit(FuelAvailabilityLoading());
+    emit(FuelAvailabilityLoading(isDieselLoading: true));
     try {
       final response = await checkDieselAvaliabiltyUsecase(
         event.stationId,
         event.fuelType,
       );
-      emit(DiselAvailabilitySuccess(response));
+
+      bool dieselAvailable;
+      if (response['data'] is bool) {
+        dieselAvailable = response['data'] as bool;
+      } else if (response['data'] is Map &&
+          response['data']['available'] != null) {
+        dieselAvailable = response['data']['available'] as bool;
+      } else {
+        throw Exception('Invalid response format for diesel availability');
+      }
+
+      _dieselAvailable = dieselAvailable;
+      emit(
+        FuelAvailabilityUpdated(
+          petrolAvailable: _petrolAvailable,
+          dieselAvailable: _dieselAvailable,
+        ),
+      );
     } catch (e) {
-      emit(FuelAvailabilityError(e.toString()));
+      emit(
+        FuelAvailabilityError(
+          e.toString(),
+          isPetrolError: false,
+          petrolAvailable: _petrolAvailable,
+          dieselAvailable: _dieselAvailable,
+        ),
+      );
     }
   }
 
@@ -66,16 +116,55 @@ class FuelAvailablityBloc
     ChangePetrolAvailabilityEvent event,
     Emitter<FuelAvailabilityState> emit,
   ) async {
-    emit(FuelAvailabilityLoading());
+    emit(FuelAvailabilityLoading(isPetrolLoading: true));
     try {
       final response = await changePetrolAvaliablityUsecase(
         event.stationId,
         event.fuelType,
       );
-      emit(PetrolAvailabilitySuccess(response));
+
+      bool petrolAvailable;
+      if (response['data'] is bool) {
+        petrolAvailable = response['data'] as bool;
+      } else if (response['data'] is Map &&
+          response['data']['available'] != null) {
+        petrolAvailable = response['data']['available'] as bool;
+      } else if (response['message']?.toLowerCase().contains('success') == true) {
+        petrolAvailable = !_petrolAvailable;
+      } else {
+        throw Exception(
+          'Invalid response format for petrol availability change',
+        );
+      }
+
+      _petrolAvailable = petrolAvailable;
+      emit(
+        FuelAvailabilityUpdated(
+          petrolAvailable: _petrolAvailable,
+          dieselAvailable: _dieselAvailable,
+        ),
+      );
       stationBloc.add(GetStationIdEvent(id: event.stationId));
     } catch (e) {
-      emit(FuelAvailabilityError(e.toString()));
+      if (e.toString().toLowerCase().contains('success')) {
+        _petrolAvailable = !_petrolAvailable;
+        emit(
+          FuelAvailabilityUpdated(
+            petrolAvailable: _petrolAvailable,
+            dieselAvailable: _dieselAvailable,
+          ),
+        );
+        stationBloc.add(GetStationIdEvent(id: event.stationId));
+      } else {
+        emit(
+          FuelAvailabilityError(
+            e.toString(),
+            isPetrolError: true,
+            petrolAvailable: _petrolAvailable,
+            dieselAvailable: _dieselAvailable,
+          ),
+        );
+      }
     }
   }
 
@@ -83,16 +172,55 @@ class FuelAvailablityBloc
     ChangeDieselAvailabilityEvent event,
     Emitter<FuelAvailabilityState> emit,
   ) async {
-    emit(FuelAvailabilityLoading());
+    emit(FuelAvailabilityLoading(isDieselLoading: true));
     try {
       final response = await changeDieselAvaliablityUsecase(
         event.stationId,
         event.fuelType,
       );
-      emit(DiselAvailabilitySuccess(response));
+
+      bool dieselAvailable;
+      if (response['data'] is bool) {
+        dieselAvailable = response['data'] as bool;
+      } else if (response['data'] is Map &&
+          response['data']['available'] != null) {
+        dieselAvailable = response['data']['available'] as bool;
+      } else if (response['message']?.toLowerCase().contains('success') == true) {
+        dieselAvailable = !_dieselAvailable;
+      } else {
+        throw Exception(
+          'Invalid response format for diesel availability change',
+        );
+      }
+
+      _dieselAvailable = dieselAvailable;
+      emit(
+        FuelAvailabilityUpdated(
+          petrolAvailable: _petrolAvailable,
+          dieselAvailable: _dieselAvailable,
+        ),
+      );
       stationBloc.add(GetStationIdEvent(id: event.stationId));
     } catch (e) {
-      emit(FuelAvailabilityError(e.toString()));
+      if (e.toString().toLowerCase().contains('success')) {
+        _dieselAvailable = !_dieselAvailable;
+        emit(
+          FuelAvailabilityUpdated(
+            petrolAvailable: _petrolAvailable,
+            dieselAvailable: _dieselAvailable,
+          ),
+        );
+        stationBloc.add(GetStationIdEvent(id: event.stationId));
+      } else {
+        emit(
+          FuelAvailabilityError(
+            e.toString(),
+            isPetrolError: false,
+            petrolAvailable: _petrolAvailable,
+            dieselAvailable: _dieselAvailable,
+          ),
+        );
+      }
     }
   }
 }

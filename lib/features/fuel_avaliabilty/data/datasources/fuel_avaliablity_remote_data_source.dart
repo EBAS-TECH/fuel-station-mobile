@@ -27,7 +27,7 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
-      print("fuel av $responseData");
+      print("Petrol $responseData");
       switch (response.statusCode) {
         case 200:
           return responseData;
@@ -65,7 +65,7 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
-      print(responseData);
+      print("Diesel $responseData");
       switch (response.statusCode) {
         case 200:
           return responseData;
@@ -82,10 +82,6 @@ class FuelAvaliablityRemoteDataSource {
             message: 'Error occurred while communicating with server',
           );
       }
-    } on http.ClientException catch (e) {
-      throw FetchDataException(message: e.message);
-    } on FormatException catch (_) {
-      throw FormatException(message: 'Invalid response format');
     } catch (e) {
       throw ExceptionHandler.handleError(e);
     }
@@ -99,7 +95,7 @@ class FuelAvaliablityRemoteDataSource {
       final token = await tokenService.getAuthToken();
       final response = await http.post(
         Uri.parse(baseUrl),
-        body: jsonEncode({"fuel_type": fuelType}),
+        body: jsonEncode({"station_id": stationId, "fuel_type": fuelType}),
         headers: {
           "Content-Type": "application/json",
           'Authorization': 'Bearer $token',
@@ -107,10 +103,21 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
-      print(responseData);
+      print("Change Petrol $responseData");
+      
+      if (response.statusCode == 200) {
+        if (responseData.containsKey('message') && 
+            responseData['message'].toLowerCase().contains('success')) {
+          return {
+            'status': 200,
+            'message': responseData['message'],
+            'data': {'available': !(responseData['data']?['available'] ?? false)}
+          };
+        }
+        return responseData;
+      }
+
       switch (response.statusCode) {
-        case 200:
-          return responseData;
         case 400:
           throw BadRequestException(message: responseData['error']);
         case 401:
@@ -124,10 +131,6 @@ class FuelAvaliablityRemoteDataSource {
             message: 'Error occurred while communicating with server',
           );
       }
-    } on http.ClientException catch (e) {
-      throw FetchDataException(message: e.message);
-    } on FormatException catch (_) {
-      throw FormatException(message: 'Invalid response format');
     } catch (e) {
       throw ExceptionHandler.handleError(e);
     }
@@ -149,9 +152,21 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
+
+      
+      if (response.statusCode == 200) {
+        if (responseData.containsKey('message') && 
+            responseData['message'].toLowerCase().contains('success')) {
+          return {
+            'status': 200,
+            'message': responseData['message'],
+            'data': {'available': !(responseData['data']?['available'] ?? false)}
+          };
+        }
+        return responseData;
+      }
+
       switch (response.statusCode) {
-        case 200:
-          return responseData;
         case 400:
           throw BadRequestException(message: responseData['error']);
         case 401:
@@ -165,10 +180,6 @@ class FuelAvaliablityRemoteDataSource {
             message: 'Error occurred while communicating with server',
           );
       }
-    } on http.ClientException catch (e) {
-      throw FetchDataException(message: e.message);
-    } on FormatException catch (_) {
-      throw FormatException(message: 'Invalid response format');
     } catch (e) {
       throw ExceptionHandler.handleError(e);
     }

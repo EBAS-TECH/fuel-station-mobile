@@ -15,8 +15,7 @@ class StationRemoteDataSources {
   Future<Map<String, dynamic>> getStationById(String id) async {
     try {
       final token = await tokenService.getAuthToken();
-      print(token);
-            final response = await http.get(
+      final response = await http.get(
         Uri.parse('$baseUrl/$id'),
         headers: {
           "Content-Type": "application/json",
@@ -25,9 +24,9 @@ class StationRemoteDataSources {
       );
 
       final responseData = jsonDecode(response.body);
-      print("station $responseData");
       switch (response.statusCode) {
         case 200:
+          tokenService.saveStationId(responseData["data"]["id"]);
           return responseData;
         case 400:
           throw BadRequestException(message: responseData['error']);
