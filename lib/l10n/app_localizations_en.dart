@@ -138,7 +138,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get duration => 'Duration';
 
   @override
-  String get available => 'available';
+  String get available => 'Available';
 
   @override
   String get showRoute => 'Show route';
@@ -174,7 +174,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get heyThere => 'Hey There';
 
   @override
-  String get logOut => 'Log Out';
+  String get logOut => 'Logout';
 
   @override
   String get logOutConfirmation => 'Are you sure you want to log out of your account?';
@@ -518,4 +518,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stationLogin => 'Station Login';
+
+  @override
+  String get stationDetails => 'Station Details';
+
+  @override
+  String get tinNumber => 'TIN Number';
+
+  @override
+  String get registeredSince => 'Registered Since';
+
+  @override
+  String get viewOnMap => 'View on Map';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get stationName => 'Station Name';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get unknownStatus => 'Unknown';
+
+  @override
+  String get openInMaps => 'Open in Maps';
+
+  @override
+  String get launchError => 'Could not launch maps';
+
+  @override
+  String get stationInformation => 'Station Information';
+
+  @override
+  String get fuelAvailabilityTitle => 'Fuel Availability';
+
+  @override
+  String get notAvailable => 'Not Available';
+
+  @override
+  String get stationIdNotFound => 'Station ID not found';
+
+  @override
+  String get loadingFuelData => 'Loading fuel data...';
+
+  @override
+  String get updatingFuelData => 'Updating fuel status...';
+
+  @override
+  String get stationManager => 'Station Manager';
+
+  @override
+  String get station => 'Station';
+
+  @override
+  String get fuel => 'Fuel';
 }

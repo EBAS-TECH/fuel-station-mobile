@@ -195,7 +195,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get accountStatus => 'የመለያ ሁኔታ';
 
   @override
-  String get verified => 'ተረጋግጧል';
+  String get verified => 'የተረጋገጠ';
 
   @override
   String get notVerified => 'አልተረጋገጠም';
@@ -518,4 +518,64 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get stationLogin => 'Station Login';
+
+  @override
+  String get stationDetails => 'የጣቢያ ዝርዝሮች';
+
+  @override
+  String get tinNumber => 'የግብር መለያ ቁጥር (TIN)';
+
+  @override
+  String get registeredSince => 'ከዚያ ጀምሮ ተመዝግቧል';
+
+  @override
+  String get viewOnMap => 'በካርታ ላይ አይት';
+
+  @override
+  String get location => 'አካባቢ';
+
+  @override
+  String get stationName => 'የጣቢያ ስም';
+
+  @override
+  String get status => 'ሁኔታ';
+
+  @override
+  String get pending => 'በመጠባበቅ ላይ';
+
+  @override
+  String get unknownStatus => 'ያልታወቀ ሁኔታ';
+
+  @override
+  String get openInMaps => 'በካርታ ውስጥ ክፈት';
+
+  @override
+  String get launchError => 'ካርታን ማከፋፈል አልተቻለም';
+
+  @override
+  String get stationInformation => 'የጣቢያ መረጃ';
+
+  @override
+  String get fuelAvailabilityTitle => 'የነዳጅ መገኘት';
+
+  @override
+  String get notAvailable => 'አይገኝም';
+
+  @override
+  String get stationIdNotFound => 'የጣቢያ መታወቂያ አልተገኘም';
+
+  @override
+  String get loadingFuelData => 'የነዳጅ መረጃን በመጫን ላይ...\'';
+
+  @override
+  String get updatingFuelData => 'የነዳጅ ሁኔታን በማዘመን ላይ...';
+
+  @override
+  String get stationManager => 'የነዳጅ ጣቢያ አስተዳዳሪ';
+
+  @override
+  String get station => 'የነዳጅ ጣቢያ';
+
+  @override
+  String get fuel => 'ነዳጅ';
 }

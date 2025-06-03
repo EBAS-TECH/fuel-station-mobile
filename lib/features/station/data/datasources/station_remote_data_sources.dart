@@ -24,6 +24,7 @@ class StationRemoteDataSources {
       );
 
       final responseData = jsonDecode(response.body);
+      print(responseData);
       switch (response.statusCode) {
         case 200:
           tokenService.saveStationId(responseData["data"]["id"]);

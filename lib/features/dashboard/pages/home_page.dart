@@ -11,6 +11,7 @@ import 'package:station_manager/features/user/presentation/bloc/user_bloc.dart';
 import 'package:station_manager/features/user/presentation/bloc/user_event.dart';
 import 'package:station_manager/features/user/presentation/bloc/user_state.dart';
 import 'package:station_manager/l10n/app_localizations.dart';
+import 'package:station_manager/shared/lanuage_switcher.dart';
 
 class HomePage extends StatefulWidget {
   final String userId;
@@ -76,13 +77,24 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text(
-          'Station Manager',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.stationManager,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: LanguageSwitcher(isSmall: true),
+          ),
+        ],
         backgroundColor: AppPallete.primaryColor,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -123,6 +135,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildProfileDrawer(BuildContext context, Map<String, dynamic> user) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Drawer(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -178,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                 _buildDrawerItem(
                   context,
                   icon: Icons.logout,
-                  title: 'Logout',
+                  title: l10n.logOut,
                   color: Colors.red,
                   onTap: () => _handleLogOut(context),
                 ),

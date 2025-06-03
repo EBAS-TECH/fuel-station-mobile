@@ -21,7 +21,7 @@ class AppPallete {
   static const Color lightHintTextColor = Color(0xFF747688);
   static const Color lightTextColor = Color(0xFF120D26);
   static const Color lightIconColor = Color(0xFF606060);
-  static Color lightCardColor = Colors.grey.shade100;
+  static Color lightCardColor = Colors.grey.shade50;
 
   static const Color darkPrimaryColorShade = Color(0xFF1C3A2D);
   static const Color darkScaffoldGradient = Color.fromRGBO(20, 20, 20, 1);

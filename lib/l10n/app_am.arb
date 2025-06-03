@@ -195,7 +195,36 @@
 "passwordErrorNumber": "ቢያንስ አንድ ቁጥር ሊኖረው ይገባል",
 "passwordErrorSpecialChar": "ቢያንስ አንድ ልዩ ምልክት ሊኖረው ይገባል",
 "passwordErrorLength": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች ሊኖሩት ይገባል",
-"passwordErrorEmpty": "የይለፍ ቃል መሞላት አለበት"
+"passwordErrorEmpty": "የይለፍ ቃል መሞላት አለበት",
+
+  "stationDetails": "የጣቢያ ዝርዝሮች",
+  "tinNumber": "የግብር መለያ ቁጥር (TIN)",
+  "registeredSince": "ከዚያ ጀምሮ ተመዝግቧል",
+  "viewOnMap": "በካርታ ላይ አይት",
+  "location": "አካባቢ",
+  "stationName": "የጣቢያ ስም",
+  "status": "ሁኔታ",
+  "verified": "የተረጋገጠ",
+  "pending": "በመጠባበቅ ላይ",
+  "unknownStatus": "ያልታወቀ ሁኔታ",
+  "openInMaps": "በካርታ ውስጥ ክፈት",
+  "launchError": "ካርታን ማከፋፈል አልተቻለም",
+  "stationInformation": "የጣቢያ መረጃ",
+
+   "fuelAvailabilityTitle": "የነዳጅ መገኘት",
+  "petrol": "ፔትሮል",
+  "diesel": "ዲዘል",
+  "available": "ይገኛል",
+  "notAvailable": "አይገኝም",
+  "stationIdNotFound": "የጣቢያ መታወቂያ አልተገኘም",
+   "loadingFuelData": "የነዳጅ መረጃን በመጫን ላይ...'",
+"updatingFuelData" : "የነዳጅ ሁኔታን በማዘመን ላይ...",
+
+ "stationManager": "የነዳጅ ጣቢያ አስተዳዳሪ",
+  "station": "የነዳጅ ጣቢያ",
+  "fuel": "ነዳጅ",
+   "locationInformation": "አካባቢ መረጃ",
+  "openInGoogleMaps": "በካርታ ክፈት"
 
 }
 

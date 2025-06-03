@@ -356,7 +356,7 @@ abstract class AppLocalizations {
   /// No description provided for @available.
   ///
   /// In en, this message translates to:
-  /// **'available'**
+  /// **'Available'**
   String get available;
 
   /// No description provided for @showRoute.
@@ -428,7 +428,7 @@ abstract class AppLocalizations {
   /// No description provided for @logOut.
   ///
   /// In en, this message translates to:
-  /// **'Log Out'**
+  /// **'Logout'**
   String get logOut;
 
   /// No description provided for @logOutConfirmation.
@@ -1096,6 +1096,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Station Login'**
   String get stationLogin;
+
+  /// No description provided for @stationDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Station Details'**
+  String get stationDetails;
+
+  /// No description provided for @tinNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'TIN Number'**
+  String get tinNumber;
+
+  /// No description provided for @registeredSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered Since'**
+  String get registeredSince;
+
+  /// No description provided for @viewOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'View on Map'**
+  String get viewOnMap;
+
+  /// No description provided for @location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
+
+  /// No description provided for @stationName.
+  ///
+  /// In en, this message translates to:
+  /// **'Station Name'**
+  String get stationName;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pending;
+
+  /// No description provided for @unknownStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknownStatus;
+
+  /// No description provided for @openInMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Maps'**
+  String get openInMaps;
+
+  /// No description provided for @launchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not launch maps'**
+  String get launchError;
+
+  /// No description provided for @stationInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Station Information'**
+  String get stationInformation;
+
+  /// No description provided for @fuelAvailabilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel Availability'**
+  String get fuelAvailabilityTitle;
+
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Available'**
+  String get notAvailable;
+
+  /// No description provided for @stationIdNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Station ID not found'**
+  String get stationIdNotFound;
+
+  /// No description provided for @loadingFuelData.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading fuel data...'**
+  String get loadingFuelData;
+
+  /// No description provided for @updatingFuelData.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating fuel status...'**
+  String get updatingFuelData;
+
+  /// No description provided for @stationManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Station Manager'**
+  String get stationManager;
+
+  /// No description provided for @station.
+  ///
+  /// In en, this message translates to:
+  /// **'Station'**
+  String get station;
+
+  /// No description provided for @fuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel'**
+  String get fuel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

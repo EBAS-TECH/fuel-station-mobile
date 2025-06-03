@@ -21,7 +21,6 @@ class AuthRemoteDataSources {
       );
 
       final responseData = jsonDecode(response.body);
-      print("AuthRemote $responseData");
       switch (response.statusCode) {
         case 200:
           return responseData;

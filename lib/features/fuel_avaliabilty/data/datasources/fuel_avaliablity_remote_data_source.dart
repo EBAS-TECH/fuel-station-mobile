@@ -27,7 +27,7 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
-      print("Petrol $responseData");
+     
       switch (response.statusCode) {
         case 200:
           return responseData;
@@ -65,7 +65,7 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
-      print("Diesel $responseData");
+    
       switch (response.statusCode) {
         case 200:
           return responseData;
@@ -103,7 +103,6 @@ class FuelAvaliablityRemoteDataSource {
       );
 
       final responseData = jsonDecode(response.body);
-      print("Change Petrol $responseData");
       
       if (response.statusCode == 200) {
         if (responseData.containsKey('message') && 
@@ -153,7 +152,6 @@ class FuelAvaliablityRemoteDataSource {
 
       final responseData = jsonDecode(response.body);
 
-      
       if (response.statusCode == 200) {
         if (responseData.containsKey('message') && 
             responseData['message'].toLowerCase().contains('success')) {

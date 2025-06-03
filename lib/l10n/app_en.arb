@@ -58,7 +58,7 @@
   "suggestionTooltip": "This suggestion is made based on the station's ratings and user votes",
   "locationPermissionRequired": "Location permission is required to access your location",
   "heyThere": "Hey There",
-  "logOut": "Log Out",
+  "logOut": "Logout",
   "logOutConfirmation": "Are you sure you want to log out of your account?",
   "cancel": "Cancel",
   "myProfile": "My Profile",
@@ -193,6 +193,33 @@
 "passwordErrorLength": "Password must be at least 8 characters long",
 "passwordErrorEmpty": "Password field must be filled",
 
-"stationLogin": "Station Login"
+"stationLogin": "Station Login",
+
+"stationDetails": "Station Details",
+"tinNumber": "TIN Number",
+"registeredSince": "Registered Since",
+"viewOnMap": "View on Map",
+"location": "Location",
+"stationName": "Station Name",
+"status": "Status",
+"verified": "Verified",
+"pending": "Pending",
+"unknownStatus": "Unknown",
+"openInMaps": "Open in Maps",
+"launchError": "Could not launch maps",
+"stationInformation": "Station Information",
+
+"fuelAvailabilityTitle": "Fuel Availability",
+  "petrol": "Petrol",
+  "diesel": "Diesel",
+  "available": "Available",
+  "notAvailable": "Not Available",
+  "stationIdNotFound": "Station ID not found",
+  "loadingFuelData": "Loading fuel data...",
+"updatingFuelData" : "Updating fuel status...",
+
+ "stationManager": "Station Manager",
+  "station": "Station",
+  "fuel": "Fuel"
 }
 
